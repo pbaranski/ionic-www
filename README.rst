@@ -7,7 +7,7 @@ Config
 Create local settings file:
 ::
 
-    cp localsettings.js.tmpl localsettings.js
+    cp js/localsettings.js.tmpl js/localsettings.js
 
 Run any server for development:
 ::
