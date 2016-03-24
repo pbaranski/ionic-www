@@ -1,0 +1,9 @@
+{
+    "name": "MovemebackMobile",
+    "version": "0.0.1dev",
+    "dependencies": {
+        "angular": "#>=1.2.16 <1.3.0",
+        "restangular": "#>=1.4.0 <1.6.0",
+        "ngstorage": "#>=0.3.4 <0.4.0"
+    }
+}
