@@ -5,7 +5,7 @@
 // the 2nd parameter is an array of 'requires'
 // 'starter.services' is found in services.js
 // 'starter.controllers' is found in controllers.js
-angular.module('starter', ['ionic', 'starter.controllers', 'starter.services'])
+angular.module('starter', ['ionic', 'restangular', 'ngStorage', 'starter.controllers', 'starter.services'])
 
 .run(function($ionicPlatform) {
   $ionicPlatform.ready(function() {
@@ -21,8 +21,55 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services'])
       StatusBar.styleDefault();
     }
   });
-})
 
+}
+).run(
+    function ($rootScope, $http, $localStorage) {
+        // Update request headers if user credentials are present in local storage
+        if ($localStorage.authentication_username && $localStorage.authentication_api_key) {
+            $http.defaults.headers.common.Authorization = 'ApiKey ' +
+                $localStorage.authentication_username + ':' + $localStorage.authentication_api_key;
+        }
+    }
+).run(
+    function ($rootScope) {
+        // Save local settings to rootScope
+        $rootScope.localSettings = $$localSettings;
+    }
+).config(
+    function ($httpProvider, RestangularProvider) {
+        var backendDomain = null;
+        if ($$localSettings.rawBackendDomain) {
+            backendDomain = $$localSettings.rawBackendDomain + '/api/v1'
+        } else {
+            backendDomain = $$localSettings.backendDomain + '/api/v1'
+        }
+        RestangularProvider.setBaseUrl(backendDomain);
+        RestangularProvider.setOnElemRestangularized(
+            function(elem, isCollection, route) {
+                elem.addRestangularMethod('getMetaList', 'get');
+                return elem;
+            }
+        );
+        RestangularProvider.addResponseInterceptor(
+            function (data, operation, what, url, response, deferred) {
+                // Making sure getList gives us array
+                if (operation === 'getList') {
+                    return response.data.objects ? response.data.objects : response.data;
+                }
+                return response.data;
+            }
+        );
+        RestangularProvider.addFullRequestInterceptor(
+            function (element, operation, what, url, headers) {
+                if (localStorage['ngStorage-authentication_api_key'] && localStorage['ngStorage-authentication_username']) {
+                    headers.Authorization = 'ApiKey ' + localStorage['ngStorage-authentication_username'].replace(/"/g,"") + ':' + localStorage['ngStorage-authentication_api_key'].replace(/"/g,"");
+                }
+                return {'headers': headers}
+            }
+        )
+    }
+)
 .config(function($stateProvider, $urlRouterProvider) {
 
   // Ionic uses AngularUI Router which uses the concept of states

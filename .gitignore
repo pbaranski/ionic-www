@@ -1,1 +1,7 @@
 .idea/*
+
+npm-debug.log
+/node_modules
+/dist
+js/localsettings.js
+thumbs.db
